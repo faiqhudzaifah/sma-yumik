@@ -1,0 +1,42 @@
+/* Import Tailwind v4 */
+@import "tailwindcss";
+
+/* Import Font lokal */
+@import "@fontsource/plus-jakarta-sans/400.css";
+@import "@fontsource/plus-jakarta-sans/500.css";
+@import "@fontsource/plus-jakarta-sans/600.css";
+@import "@fontsource/plus-jakarta-sans/700.css";
+
+@import "@phosphor-icons/web/regular";
+
+@theme {
+    --color-yumik-primary: #18c95d;
+    --color-yumik-accent: #8b5cf6;
+
+    --color-yumik-bg-light: #f4f7f6;
+    --color-yumik-bg-dark: #121212;
+    --color-yumik-surface-light: #ffffff;
+    --color-yumik-surface-dark: #1e1e1e;
+
+    --font-sans: "Plus Jakarta Sans", sans-serif;
+
+    --radius-3xl: 1.5rem;
+    --radius-4xl: 2rem;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    body {
+        @apply bg-yumik-bg-light text-slate-800 transition-colors duration-300 font-sans;
+    }
+    body.dark {
+        @apply bg-yumik-bg-dark text-slate-200;
+    }
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
