@@ -3,56 +3,56 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
-use App\Models\Semester;
-use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Semester;
+use App\Models\Schedule;
 
 class CourseController extends Controller
 {
-    /**
-     * Menampilkan daftar Mapel/Jadwal milik siswa di semester aktif.
-     */
     public function index()
     {
         $siswa = Auth::user()->siswa;
-        $activeSemester = Semester::where('is_active', true)->firstOrFail();
+        $activeSemester = Semester::where('is_active', true)->first();
+        $enrollmentAktif = $siswa->classrooms()->where('semester_id', $activeSemester->id)->first();
 
-        // 1. Cari siswa ini ada di Rombel mana pada semester aktif
-        $classroom = $siswa->classrooms()->where('semester_id', $activeSemester->id)->first();
-
-        if (!$classroom) {
-            return view('siswa.course.empty', ['message' => 'Anda belum dimasukkan ke rombongan belajar manapun di semester ini.']);
+        $courses = collect();
+        if ($enrollmentAktif) {
+            // Mengambil daftar mata pelajaran unik berdasarkan jadwal kelas
+            $courses = Schedule::with(['subject', 'guru'])
+                ->where('classroom_id', $enrollmentAktif->id)
+                ->where('semester_id', $activeSemester->id)
+                ->get()
+                ->unique('subject_id');
         }
 
-        // 2. Tarik semua jadwal mapel untuk Rombel tersebut
-        $schedules = Schedule::with(['subject', 'guru.user'])
-            ->where('classroom_id', $classroom->id)
-            ->where('semester_id', $activeSemester->id)
-            ->orderBy('jam_ke_mulai', 'asc')
-            ->get();
-
-        return view('siswa.course.index', compact('schedules', 'classroom'));
+        return view('siswa.course.index', compact('courses'));
     }
 
-    /**
-     * Menampilkan detail satu Mapel (Materi, Tugas, Ujian, Riwayat Presensi).
-     */
-    public function show(Schedule $schedule)
+    public function show($scheduleId)
     {
-        // Validasi keamanan: Pastikan siswa benar-benar berada di kelas pemilik jadwal ini
         $siswa = Auth::user()->siswa;
-        $isEnrolled = $siswa->classrooms()->where('classrooms.id', $schedule->classroom_id)->exists();
+        $schedule = Schedule::with(['subject', 'guru', 'classroom'])->findOrFail($scheduleId);
 
+        // Validasi hak akses (Siswa harus berada di kelas ini)
+        $isEnrolled = $siswa->classrooms()->where('classroom_id', $schedule->classroom_id)->exists();
         if (!$isEnrolled) {
-            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini.');
+            abort(403, 'Anda tidak terdaftar dalam mata pelajaran ini.');
         }
 
-        // Muat semua aktivitas belajar
-        $schedule->load(['materials', 'assignments', 'assessments', 'meetings.attendances' => function ($query) use ($siswa) {
-            $query->where('siswa_id', $siswa->id);
-        }]);
+        $subject = $schedule->subject;
+        $guru = $schedule->guru;
+        $classroom = $schedule->classroom;
 
-        return view('siswa.course.show', compact('schedule'));
+        // Ambil Materi Published
+        $materiPublished = $schedule->materials()->where('status', 'PUBLISHED')->latest()->get();
+
+        // Ambil Tugas & Submission Siswa
+        $tugasDaftar = $schedule->assignments()->latest()->get()->map(function ($tugas) use ($siswa) {
+            $tugas->submission = $tugas->submissions()->where('siswa_id', $siswa->id)->first();
+            return $tugas;
+        });
+
+        return view('siswa.course.show', compact('schedule', 'subject', 'guru', 'classroom', 'materiPublished', 'tugasDaftar'));
     }
 }

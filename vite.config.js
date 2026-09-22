@@ -11,6 +11,7 @@ export default defineConfig({
                 "resources/js/app.js",
                 "resources/js/ui-animations.js",
                 "resources/js/pengguna-form.js",
+                "resources/js/cbt-engine.js",
             ],
             refresh: true,
             fonts: [

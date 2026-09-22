@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\AcademicCalendarController;
 use App\Http\Controllers\Admin\PromotionController;
 
-// Import Controller Guru
 use App\Http\Controllers\Guru\MeetingController;
 use App\Http\Controllers\Guru\AssignmentController;
 use App\Http\Controllers\Guru\AssessmentController;
@@ -20,6 +19,14 @@ use App\Http\Controllers\Guru\AssessmentGradingController;
 use App\Http\Controllers\Guru\QuestionController;
 use App\Http\Controllers\Guru\GradebookController;
 use App\Http\Controllers\Guru\MaterialController;
+
+// Tambahkan alias (as) untuk Controller Siswa
+use App\Http\Controllers\Siswa\CourseController as SiswaCourseController;
+use App\Http\Controllers\Siswa\AssignmentController as SiswaAssignmentController;
+use App\Http\Controllers\Siswa\CbtController as SiswaCbtController;
+use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
+use App\Http\Controllers\Siswa\MaterialController as SiswaMaterialController;
+use App\Http\Controllers\Siswa\GradebookController as SiswaGradebookController;
 
 use App\Models\Siswa;
 use App\Models\Guru;
@@ -228,14 +235,49 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ==========================================
-    // 3. ROUTE SISWA & OPERATOR (Placeholder)
+    // 3. ROUTE SISWA (Role ID: 3)
     // ==========================================
     Route::prefix('siswa')->name('siswa.')->group(function () {
-        Route::get('/dashboard', function () {
-            return "Dashboard Siswa";
-        })->name('dashboard');
+
+        // Dashboard Siswa
+        Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
+
+        // Mata Pelajaran (Course) & Pertemuan
+        Route::prefix('course')->name('course.')->group(function () {
+            Route::get('/', [SiswaCourseController::class, 'index'])->name('index');
+            Route::get('/{course}', [SiswaCourseController::class, 'show'])->name('show');
+        });
+
+        // Akses Materi Pembelajaran
+        Route::get('/material/{material}', [SiswaMaterialController::class, 'show'])->name('material.show');
+
+        // Tugas & Submission
+        Route::prefix('assignment')->name('assignment.')->group(function () {
+            Route::get('/', [SiswaAssignmentController::class, 'index'])->name('index');
+            Route::get('/{assignment}', [SiswaAssignmentController::class, 'show'])->name('show');
+            Route::post('/{assignment}/submit', [SiswaAssignmentController::class, 'submit'])->name('submit');
+        });
+
+        // CBT Engine (Kuis & Ujian)
+        Route::prefix('cbt')->name('cbt.')->group(function () {
+            Route::get('/', [SiswaCbtController::class, 'index'])->name('index');
+            Route::get('/{cbt}', [SiswaCbtController::class, 'show'])->name('show');
+            Route::post('/{cbt}/start', [SiswaCbtController::class, 'start'])->name('start');
+            Route::get('/{cbt}/attempt/{attempt}', [SiswaCbtController::class, 'attempt'])->name('attempt');
+            Route::post('/{cbt}/attempt/{attempt}/store', [SiswaCbtController::class, 'storeAnswer'])->name('store_answer');
+            Route::post('/{cbt}/attempt/{attempt}/submit', [SiswaCbtController::class, 'submit'])->name('submit');
+        });
+
+        // Rapor dan Kehadiran
+        Route::prefix('akademik')->name('akademik.')->group(function () {
+            Route::get('/rapor', [SiswaGradebookController::class, 'index'])->name('rapor');
+            Route::get('/kehadiran', [SiswaGradebookController::class, 'attendance'])->name('kehadiran');
+        });
     });
 
+    // ==========================================
+    // 4. ROUTE OPERATOR (Role ID: 4)
+    // ==========================================
     Route::prefix('operator')->name('operator.')->group(function () {
         Route::get('/dashboard', function () {
             return "Dashboard Operator";
