@@ -13,16 +13,21 @@ class MaterialController extends Controller
         $siswa = Auth::user()->siswa;
         $schedule = $material->schedule;
 
-        // Cek apakah siswa terdaftar di rombel tempat materi ini dibagikan
-        $isEnrolled = $siswa->classrooms()->where('classroom_id', $schedule->classroom_id)->exists();
+        $isEnrolled = $siswa->classrooms()
+            ->where('classroom_id', $schedule->classroom_id)
+            ->exists();
 
         if (!$isEnrolled) {
             abort(403, 'Anda tidak memiliki akses ke materi ini.');
         }
 
-        if ($material->status !== 'PUBLISHED') {
-            abort(404, 'Materi belum dipublikasikan atau sudah ditarik.');
-        }
+        // FIX: Kolom status tidak ada di migration materials.
+        // Hapus pengecekan status agar tidak error.
+        // Kalau nanti kolom status ditambah, aktifkan lagi baris di bawah.
+
+        // if ($material->status !== 'PUBLISHED') {
+        //     abort(404, 'Materi belum dipublikasikan.');
+        // }
 
         return view('siswa.materi.show', compact('material'));
     }

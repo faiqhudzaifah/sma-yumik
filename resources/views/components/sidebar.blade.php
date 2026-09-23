@@ -43,7 +43,6 @@
             {{-- ========================================== --}}
             @elseif(auth()->user()->role_id == 2)
                 @php
-                    // Ambil relasi guru dan semester aktif untuk membangun sidebar dinamis
                     /** @var \App\Models\User $user */
                     $user = auth()->user();
                     $guru = $user->guru;
@@ -79,13 +78,11 @@
                 
                 @forelse($myCourses as $course)
                     @php
-                        // Deteksi cerdas apakah Guru sedang berada di dalam kelas ini
                         $currentRouteSchedule = request()->route('schedule');
                         $currentScheduleId = is_object($currentRouteSchedule) ? $currentRouteSchedule->id : $currentRouteSchedule;
                         $isActiveCourse = $currentScheduleId == $course->id;
                     @endphp
                     
-                    <!-- Link Induk Kelas -->
                     <a href="{{ route('guru.schedule.meeting.index', $course->id) }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ $isActiveCourse ? 'bg-slate-100 dark:bg-white/10 text-yumik-primary shadow-sm font-bold' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 font-medium group' }} transition-all">
                         <div class="w-8 h-8 rounded-[1rem] {{ $isActiveCourse ? 'bg-yumik-primary/10 text-yumik-primary' : 'bg-slate-200 dark:bg-slate-800 text-slate-400' }} flex items-center justify-center shrink-0">
                             <i class="{{ $isActiveCourse ? 'ph-bold' : 'ph-fill' }} ph-chalkboard-teacher text-lg"></i>
@@ -100,30 +97,23 @@
                         @endif
                     </a>
 
-                    <!-- SUB-MENU BERSARANG (Hanya muncul jika kelas sedang aktif) -->
                     @if($isActiveCourse)
                         <div class="flex flex-col gap-1 ml-9 mt-1 mb-3 border-l-[2px] border-slate-100 dark:border-white/10 pl-2">
-                            
                             <a href="{{ route('guru.schedule.meeting.index', $course->id) }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('guru.schedule.meeting.*') ? 'text-yumik-primary bg-yumik-primary/10' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-white/5' }}">
                                 <i class="ph-bold ph-calendar-check text-sm shrink-0"></i> Pertemuan & Presensi
                             </a>
-                            
                             <a href="{{ route('guru.schedule.assignment.index', $course->id) }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('guru.schedule.assignment.*') ? 'text-yumik-primary bg-yumik-primary/10' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-white/5' }}">
                                 <i class="ph-bold ph-files text-sm shrink-0"></i> Tugas Manual
                             </a>
-                            
                             <a href="{{ route('guru.schedule.assessment.index', $course->id) }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('guru.schedule.assessment.*') ? 'text-yumik-primary bg-yumik-primary/10' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-white/5' }}">
-    <i class="ph-bold ph-exam text-sm shrink-0"></i> Ujian CBT
-</a>
-                            
+                                <i class="ph-bold ph-exam text-sm shrink-0"></i> Ujian CBT
+                            </a>
                             <a href="{{ route('guru.schedule.material.index', $course->id) }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('guru.schedule.material.*') ? 'text-yumik-primary bg-yumik-primary/10' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-white/5' }}">
                                 <i class="ph-bold ph-books text-sm shrink-0"></i> Bank Materi
                             </a>
-                            
                             <a href="{{ route('guru.schedule.gradebook.index', $course->id) }}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all {{ request()->routeIs('guru.schedule.gradebook.*') ? 'text-yumik-primary bg-yumik-primary/10' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-white/5' }}">
                                 <i class="ph-bold ph-notebook text-sm shrink-0"></i> Buku Nilai Akhir
                             </a>
-
                         </div>
                     @endif
                 @empty
@@ -143,6 +133,38 @@
                         </div>
                     </a>
                 @endif
+                
+            {{-- ========================================== --}}
+            {{-- MENU SISWA (ROLE ID: 3)                     --}}
+            {{-- ========================================== --}}
+            @elseif(auth()->user()->role_id == 3)
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 pl-2 mb-2">Aktivitas Belajar</span>
+                
+                <a href="{{ route('siswa.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ request()->routeIs('siswa.dashboard') ? 'bg-slate-100 dark:bg-white/10 text-yumik-primary shadow-sm font-bold' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white font-medium group' }} transition-all">
+                    <i class="{{ request()->routeIs('siswa.dashboard') ? 'ph-fill' : 'ph-bold' }} ph-squares-four text-xl group-hover:scale-110 transition-transform"></i>
+                    Dashboard
+                </a>
+                
+                <a href="{{ route('siswa.course.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ request()->routeIs('siswa.course.*') ? 'bg-slate-100 dark:bg-white/10 text-yumik-primary shadow-sm font-bold' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white font-medium group' }} transition-all">
+                    <i class="{{ request()->routeIs('siswa.course.*') ? 'ph-fill' : 'ph-bold' }} ph-books text-xl group-hover:scale-110 transition-transform"></i>
+                    Mata Pelajaran
+                </a>
+
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 pl-2 mt-4 mb-2">Akademik</span>
+
+                @if(Route::has('siswa.akademik.rapor'))
+    <a href="{{ route('siswa.akademik.rapor') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ request()->routeIs('siswa.akademik.rapor') ? 'bg-slate-100 dark:bg-white/10 text-yumik-primary shadow-sm font-bold' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white font-medium group' }} transition-all">
+        <i class="{{ request()->routeIs('siswa.akademik.rapor') ? 'ph-fill' : 'ph-bold' }} ph-notebook text-xl group-hover:scale-110 transition-transform"></i>
+        Rapor Akademik
+    </a>
+@endif
+
+@if(Route::has('siswa.akademik.kehadiran'))
+    <a href="{{ route('siswa.akademik.kehadiran') }}" class="flex items-center gap-3 px-4 py-3 rounded-2xl {{ request()->routeIs('siswa.akademik.kehadiran') ? 'bg-slate-100 dark:bg-white/10 text-yumik-primary shadow-sm font-bold' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white font-medium group' }} transition-all">
+        <i class="{{ request()->routeIs('siswa.akademik.kehadiran') ? 'ph-fill' : 'ph-bold' }} ph-calendar-check text-xl group-hover:scale-110 transition-transform"></i>
+        Rekap Presensi
+    </a>
+@endif
             @endif
         @endauth
     </nav>

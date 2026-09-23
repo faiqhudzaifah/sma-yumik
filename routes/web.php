@@ -263,6 +263,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [SiswaCbtController::class, 'index'])->name('index');
             Route::get('/{cbt}', [SiswaCbtController::class, 'show'])->name('show');
             Route::post('/{cbt}/start', [SiswaCbtController::class, 'start'])->name('start');
+            Route::get('/{cbt}/exam', [SiswaCbtController::class, 'exam'])->name('exam');
             Route::get('/{cbt}/attempt/{attempt}', [SiswaCbtController::class, 'attempt'])->name('attempt');
             Route::post('/{cbt}/attempt/{attempt}/store', [SiswaCbtController::class, 'storeAnswer'])->name('store_answer');
             Route::post('/{cbt}/attempt/{attempt}/submit', [SiswaCbtController::class, 'submit'])->name('submit');
@@ -273,6 +274,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/rapor', [SiswaGradebookController::class, 'index'])->name('rapor');
             Route::get('/kehadiran', [SiswaGradebookController::class, 'attendance'])->name('kehadiran');
         });
+
+        // Route::get('/gradebook', [\App\Http\Controllers\Siswa\GradebookController::class, 'index'])
+        //     ->name('gradebook.index');
+
+        // Route::get('/gradebook/attendance', [\App\Http\Controllers\Siswa\GradebookController::class, 'attendance'])
+        //     ->name('gradebook.attendance');
     });
 
     // ==========================================

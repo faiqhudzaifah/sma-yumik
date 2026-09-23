@@ -132,12 +132,12 @@
                     @forelse($courses as $course)
                         <!-- Link mengarah ke index pertemuan course tersebut -->
                         <a href="{{ route('guru.schedule.meeting.index', $course->id) }}" class="block">
-                            <x-course-card 
-                                title="{{ $course->classroom->name }}" 
-                                subject="{{ $course->subject->name }}" 
-                                progress="0" 
-                                icon="calculator" 
-                            />
+                            <x-guru.course-card 
+    title="{{ $course->classroom->name }}" 
+    subject="{{ $course->subject->name }}" 
+    progress="0" 
+    icon="calculator" 
+/>
                         </a>
                     @empty
                         <div class="text-sm text-slate-500 px-2">Belum ada kelas yang ditugaskan.</div>

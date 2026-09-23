@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
 use App\Models\Attendance;
+use App\Models\Submission;
 use App\Models\Semester;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,13 +16,25 @@ class GradebookController extends Controller
         $siswa = Auth::user()->siswa;
         $activeSemester = Semester::where('is_active', true)->first();
 
-        // Asumsi model Grade memiliki relasi 'assessment' dan 'assignment' bawaan dari backend Anda
-        $grades = Grade::with(['assessment', 'assignment'])
+        // Nilai dari TUGAS (Grade)
+        $assignmentGrades = Grade::with(['assignment.schedule.subject'])
             ->where('siswa_id', $siswa->id)
+            ->whereNotNull('assignment_id')
             ->latest()
             ->get();
 
-        return view('siswa.akademik.rapor', compact('grades', 'activeSemester'));
+        // Nilai dari UJIAN (Submission)
+        $examScores = Submission::with(['assessment.schedule.subject'])
+            ->where('siswa_id', $siswa->id)
+            ->whereNotNull('submitted_at')
+            ->latest()
+            ->get();
+
+        return view('siswa.akademik.rapor', compact(
+            'assignmentGrades',
+            'examScores',
+            'activeSemester'
+        ));
     }
 
     public function attendance()
@@ -29,11 +42,23 @@ class GradebookController extends Controller
         $siswa = Auth::user()->siswa;
         $activeSemester = Semester::where('is_active', true)->first();
 
-        // Mengambil histori kehadiran langsung dari tabel attendances
-        $attendances = Attendance::where('siswa_id', $siswa->id)
+        $attendances = Attendance::with(['meeting.schedule.subject'])
+            ->where('siswa_id', $siswa->id)
             ->latest()
             ->get();
 
-        return view('siswa.akademik.kehadiran', compact('attendances', 'activeSemester'));
+        // Hitung rekap
+        $summary = [
+            'Hadir' => $attendances->where('status', 'Hadir')->count(),
+            'Sakit' => $attendances->where('status', 'Sakit')->count(),
+            'Izin'  => $attendances->where('status', 'Izin')->count(),
+            'Alpa'  => $attendances->where('status', 'Alpa')->count(),
+        ];
+
+        return view('siswa.akademik.kehadiran', compact(
+            'attendances',
+            'activeSemester',
+            'summary'
+        ));
     }
 }

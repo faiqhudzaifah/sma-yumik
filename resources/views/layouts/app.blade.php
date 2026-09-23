@@ -15,24 +15,25 @@
     </script>
 </head>
 <body class="antialiased selection:bg-yumik-primary selection:text-white bg-[#E9EEED] dark:bg-[#0A0D14] min-h-screen flex relative font-sans transition-colors duration-500 text-slate-700 dark:text-slate-300 overflow-x-hidden">
-    
+
     <!-- Latar Belakang Glassmorphism -->
     <div class="fixed top-[-10%] left-[-10%] w-[50rem] h-[50rem] bg-yumik-primary/25 dark:bg-yumik-primary/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
     <div class="fixed bottom-[-10%] right-[-10%] w-[45rem] h-[45rem] bg-purple-500/15 dark:bg-purple-900/15 blur-[120px] rounded-full pointer-events-none -z-10"></div>
 
-    <!-- Overlay untuk Mobile Sidebar (Ada di z-40) -->
+    <!-- Overlay untuk Mobile Sidebar -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity opacity-0"></div>
 
-    <!-- Layout Wrapper: HAPUS z-10 di sini agar sidebar bisa tembus ke atas -->
+    <!-- Layout Wrapper -->
     <div class="w-full max-w-[1400px] mx-auto flex gap-6 px-4 sm:px-8 py-6 relative">
-        
-        <!-- Sidebar (Sudah kita set z-[100] di dalam komponennya) -->
+
         <x-sidebar />
 
-        <!-- Area Konten Utama (Berada di z-30 agar tertutup rapi oleh overlay) -->
         <main class="flex-1 min-w-0 flex flex-col pb-12 w-full relative z-30">
-            
-            <x-header-profile name="{{ auth()->user()->name ?? 'Administrator' }}" avatar="{{ auth()->user()->guru->photo ?? '' }}" />
+
+            <x-header-profile
+                name="{{ auth()->user()->name ?? 'Pengguna' }}"
+                avatar="{{ auth()->user()->guru?->photo ?? auth()->user()->siswa?->photo ?? '' }}"
+            />
 
             <div class="mt-4 w-full">
                 @yield('content')
@@ -69,6 +70,7 @@
         const toggleBtn = document.getElementById('mobile-menu-btn');
 
         function toggleSidebar() {
+            if (!sidebar || !overlay) return;
             const isClosed = sidebar.classList.contains('-translate-x-full');
             if (isClosed) {
                 sidebar.classList.remove('-translate-x-full');
@@ -84,5 +86,8 @@
         if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
         if (overlay) overlay.addEventListener('click', toggleSidebar);
     </script>
+
+    @stack('scripts')
+
 </body>
 </html>

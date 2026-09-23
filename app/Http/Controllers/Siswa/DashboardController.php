@@ -3,81 +3,129 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Semester;
 use App\Models\Schedule;
 use App\Models\Assignment;
 use App\Models\Assessment;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $siswa = $user->siswa;
-        $activeSemester = Semester::where('is_active', true)->first();
 
-        if (!$activeSemester || !$siswa) {
-            abort(403, 'Semester aktif atau data siswa tidak ditemukan.');
+        $activeSemester = Semester::where('is_active', 1)->first();
+
+        // Default values
+        $classroom = null;
+        $activeCoursesCount = 0;
+        $pendingAssignmentsCount = 0;
+        $availableExamsCount = 0;
+        $recentCourses = collect();
+        $upcomingAssignments = collect();
+        $availableExams = collect();
+        $todaySchedules = collect();
+        $todayName = $this->getIndonesianDayName(now()->format('l'));
+
+        if ($siswa && $activeSemester) {
+            $classroom = $siswa->classrooms()
+                ->where('semester_id', $activeSemester->id)
+                ->first();
+
+            if ($classroom) {
+                // ==========================================
+                // 1. MATA PELAJARAN (Course) — unik per subject
+                // ==========================================
+                $recentCourses = Schedule::with(['subject', 'guru'])
+                    ->where('classroom_id', $classroom->id)
+                    ->where('semester_id', $activeSemester->id)
+                    ->get()
+                    ->unique('subject_id')
+                    ->values();
+
+                $activeCoursesCount = $recentCourses->count();
+
+                // ==========================================
+                // 2. JADWAL HARI INI
+                // ==========================================
+                $todaySchedules = Schedule::with(['subject', 'guru'])
+                    ->where('classroom_id', $classroom->id)
+                    ->where('semester_id', $activeSemester->id)
+                    ->where('day_of_week', $todayName)
+                    ->orderBy('jam_ke_mulai')
+                    ->get();
+
+                // ==========================================
+                // 3. TUGAS MENDATANG (belum dikerjakan, due_date >= now)
+                // ==========================================
+                $upcomingAssignments = Assignment::with(['schedule.subject', 'schedule.guru'])
+                    ->whereHas('schedule', function ($q) use ($classroom) {
+                        $q->where('classroom_id', $classroom->id);
+                    })
+                    ->whereNotIn('id', function ($q) use ($siswa) {
+                        $q->select('assignment_id')
+                            ->from('grades')
+                            ->where('siswa_id', $siswa->id)
+                            ->whereNotNull('assignment_id')
+                            ->whereNotNull('submitted_at'); // sudah submit
+                    })
+                    ->where('due_date', '>=', Carbon::now())
+                    ->orderBy('due_date')
+                    ->take(5)
+                    ->get();
+
+                $pendingAssignmentsCount = $upcomingAssignments->count();
+
+                // ==========================================
+                // 4. UJIAN TERSEDIA (PUBLISHED & dalam window)
+                // ==========================================
+                $availableExams = Assessment::with(['schedule.subject', 'schedule.guru'])
+                    ->whereHas('schedule', function ($q) use ($classroom) {
+                        $q->where('classroom_id', $classroom->id);
+                    })
+                    ->where('status', 'PUBLISHED')
+                    ->where('start_at', '<=', Carbon::now())
+                    ->where('end_at', '>=', Carbon::now())
+                    ->orderBy('end_at')
+                    ->take(5)
+                    ->get();
+
+                $availableExamsCount = $availableExams->count();
+            }
         }
 
-        $enrollmentAktif = $siswa->classrooms()->where('semester_id', $activeSemester->id)->first();
+        return view('siswa.dashboard', compact(
+            'siswa',
+            'activeSemester',
+            'classroom',
+            'activeCoursesCount',
+            'pendingAssignmentsCount',
+            'availableExamsCount',
+            'recentCourses',
+            'upcomingAssignments',
+            'availableExams',
+            'todaySchedules',
+            'todayName'
+        ));
+    }
 
-        if (!$enrollmentAktif) {
-            // Jika tidak ada kelas, kembalikan data kosong agar Front-End tidak error
-            return view('siswa.dashboard', [
-                'jadwalHariIni' => collect(),
-                'tugasMendesak' => collect(),
-                'kuisTersedia' => collect()
-            ]);
-        }
-
-        $hariMap = [
-            'Sunday' => 'Minggu',
-            'Monday' => 'Senin',
-            'Tuesday' => 'Selasa',
+    /**
+     * Konversi nama hari Inggris → Indonesia
+     */
+    private function getIndonesianDayName(string $englishDay): string
+    {
+        return [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
             'Wednesday' => 'Rabu',
-            'Thursday' => 'Kamis',
-            'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu'
-        ];
-        $hariIni = $hariMap[now()->format('l')];
-
-        // 1. Jadwal Hari Ini
-        $jadwalHariIni = Schedule::with(['subject', 'guru', 'lessonHour'])
-            ->where('classroom_id', $enrollmentAktif->id)
-            ->where('semester_id', $activeSemester->id)
-            ->where('day_of_week', $hariIni)
-            ->orderBy('jam_ke_mulai', 'asc')
-            ->get();
-
-        // 2. Tugas Mendesak (Tanpa mengubah model/relasi, menggunakan subquery murni ke tabel grades)
-        $tugasMendesak = Assignment::with('subject')
-            ->whereHas('schedule', function ($q) use ($enrollmentAktif) {
-                $q->where('classroom_id', $enrollmentAktif->id);
-            })
-            ->whereNotIn('id', function ($query) use ($siswa) {
-                $query->select('assignment_id')
-                    ->from('grades')
-                    ->where('siswa_id', $siswa->id)
-                    ->whereNotNull('assignment_id');
-            })
-            ->where('deadline', '>=', now())
-            ->orderBy('deadline', 'asc')
-            ->take(5)
-            ->get();
-
-        // 3. Kuis Tersedia
-        $kuisTersedia = Assessment::whereHas('schedule', function ($q) use ($enrollmentAktif) {
-            $q->where('classroom_id', $enrollmentAktif->id);
-        })
-            ->where('status', 'PUBLISHED')
-            ->where('waktu_mulai', '<=', now())
-            ->where('waktu_selesai', '>=', now())
-            ->get();
-
-        return view('siswa.dashboard', compact('enrollmentAktif', 'jadwalHariIni', 'tugasMendesak', 'kuisTersedia'));
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+        ][$englishDay] ?? $englishDay;
     }
 }
