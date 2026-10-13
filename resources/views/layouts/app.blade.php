@@ -33,7 +33,8 @@
             <x-header-profile
                 name="{{ auth()->user()->name ?? 'Pengguna' }}"
                 avatar="{{ auth()->user()->guru?->photo ?? auth()->user()->siswa?->photo ?? '' }}"
-            />
+                email="{{ auth()->user()->email ?? '' }}"
+            />  
 
             <div class="mt-4 w-full">
                 @yield('content')

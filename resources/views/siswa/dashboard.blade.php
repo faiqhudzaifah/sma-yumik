@@ -53,7 +53,51 @@
             @endif
         </div>
     </x-card>
+{{-- PENGUMUMAN --}}
+@php
+    $activeSemester = \App\Models\Semester::where('is_active', true)->first();
+    $siswa = auth()->user()->siswa;
+    $classroomIds = $siswa
+        ? $siswa->classrooms()->where('semester_id', $activeSemester?->id)->pluck('classrooms.id')
+        : collect();
 
+    $myScheduleIds = \App\Models\Schedule::whereIn('classroom_id', $classroomIds)
+        ->where('semester_id', $activeSemester?->id)
+        ->pluck('id');
+
+    $announcements = \App\Models\Announcement::with(['schedule.subject', 'schedule.classroom', 'user'])
+        ->whereIn('schedule_id', $myScheduleIds)
+        ->orderByDesc('priority')
+        ->orderByDesc('start_at')
+        ->take(5)
+        ->get()
+        ->map(function ($ann) {
+            $ann->is_read = \App\Models\AnnouncementRead::where('announcement_id', $ann->id)
+                ->where('user_id', auth()->id())
+                ->exists();
+            return $ann;
+        });
+@endphp
+
+@if($announcements->isNotEmpty())
+    <x-card class="p-6">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <i class="ph-fill ph-megaphone text-yumik-primary text-xl"></i>
+                Pengumuman
+            </h3>
+            <span class="text-[10px] font-black uppercase tracking-widest text-yumik-primary bg-yumik-primary/10 px-2 py-1 rounded-full">
+                {{ $announcements->count() }}
+            </span>
+        </div>
+
+        <div class="space-y-3">
+            @foreach($announcements as $announcement)
+                <x-announcement-card :announcement="$announcement" :allowMarkRead="true" :isRead="$announcement->is_read" />
+            @endforeach
+        </div>
+    </x-card>
+@endif
     {{-- ============================================ --}}
     {{-- STAT CARDS --}}
     {{-- ============================================ --}}

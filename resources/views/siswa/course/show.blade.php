@@ -32,7 +32,38 @@
             </div>
         </div>
     </x-card>
+    {{-- PENGUMUMAN MAPEL INI --}}
+@php
+    $mapelAnnouncements = \App\Models\Announcement::with(['user'])
+        ->where('schedule_id', $schedule->id)
+        ->orderByDesc('priority')
+        ->orderByDesc('start_at')
+        ->take(5)
+        ->get()
+        ->map(function ($ann) {
+            $ann->is_read = \App\Models\AnnouncementRead::where('announcement_id', $ann->id)
+                ->where('user_id', auth()->id())
+                ->exists();
+            return $ann;
+        });
+@endphp
 
+@if($mapelAnnouncements->isNotEmpty())
+    <x-card class="p-6 lg:p-8">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <i class="ph-fill ph-megaphone text-yumik-primary text-xl"></i>
+                Pengumuman Mapel Ini
+            </h3>
+        </div>
+
+        <div class="space-y-3">
+            @foreach($mapelAnnouncements as $announcement)
+                <x-announcement-card :announcement="$announcement" :showSchedule="false" :allowMarkRead="true" :isRead="$announcement->is_read" />
+            @endforeach
+        </div>
+    </x-card>
+@endif
     {{-- GRID: MATERI + TUGAS + UJIAN --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 

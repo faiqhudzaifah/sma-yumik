@@ -1,0 +1,128 @@
+
+  GET|HEAD        / ...................................................................................... login › routes/web.php:46
+  GET|HEAD        admin/dashboard .............................................................. admin.dashboard › routes/web.php:91
+  GET|HEAD        admin/jadwal ................................................. admin.jadwal.index › Admin\ScheduleController@index
+  POST            admin/jadwal ................................................. admin.jadwal.store › Admin\ScheduleController@store
+  GET|HEAD        admin/jadwal/create ........................................ admin.jadwal.create › Admin\ScheduleController@create
+  GET|HEAD        admin/jadwal/{jadwal} .......................................... admin.jadwal.show › Admin\ScheduleController@show
+  PUT|PATCH       admin/jadwal/{jadwal} ...................................... admin.jadwal.update › Admin\ScheduleController@update
+  DELETE          admin/jadwal/{jadwal} .................................... admin.jadwal.destroy › Admin\ScheduleController@destroy
+  GET|HEAD        admin/jadwal/{jadwal}/edit ..................................... admin.jadwal.edit › Admin\ScheduleController@edit
+  GET|HEAD        admin/jam-pelajaran ................................. admin.jam-pelajaran.index › Admin\LessonHourController@index
+  POST            admin/jam-pelajaran ................................. admin.jam-pelajaran.store › Admin\LessonHourController@store
+  PUT|PATCH       admin/jam-pelajaran/{jam_pelajaran} ............... admin.jam-pelajaran.update › Admin\LessonHourController@update
+  DELETE          admin/jam-pelajaran/{jam_pelajaran} ............. admin.jam-pelajaran.destroy › Admin\LessonHourController@destroy
+  GET|HEAD        admin/kalender ..................................... admin.kalender.index › Admin\AcademicCalendarController@index
+  POST            admin/kalender ..................................... admin.kalender.store › Admin\AcademicCalendarController@store
+  GET|HEAD        admin/kalender/create ............................ admin.kalender.create › Admin\AcademicCalendarController@create
+  GET|HEAD        admin/kalender/{kalender_akademik} ................... admin.kalender.show › Admin\AcademicCalendarController@show
+  PUT|PATCH       admin/kalender/{kalender_akademik} ............... admin.kalender.update › Admin\AcademicCalendarController@update
+  DELETE          admin/kalender/{kalender_akademik} ............. admin.kalender.destroy › Admin\AcademicCalendarController@destroy
+  GET|HEAD        admin/kalender/{kalender_akademik}/edit .............. admin.kalender.edit › Admin\AcademicCalendarController@edit
+  GET|HEAD        admin/mapel .................................................... admin.mapel.index › Admin\SubjectController@index
+  POST            admin/mapel .................................................... admin.mapel.store › Admin\SubjectController@store
+  GET|HEAD        admin/mapel/create ........................................... admin.mapel.create › Admin\SubjectController@create
+  GET|HEAD        admin/mapel/{mapel} .............................................. admin.mapel.show › Admin\SubjectController@show
+  PUT|PATCH       admin/mapel/{mapel} .......................................... admin.mapel.update › Admin\SubjectController@update
+  DELETE          admin/mapel/{mapel} ........................................ admin.mapel.destroy › Admin\SubjectController@destroy
+  GET|HEAD        admin/mapel/{mapel}/edit ......................................... admin.mapel.edit › Admin\SubjectController@edit
+  GET|HEAD        admin/pengguna ................................................. admin.pengguna.index › Admin\UserController@index
+  POST            admin/pengguna ................................................. admin.pengguna.store › Admin\UserController@store
+  GET|HEAD        admin/pengguna/create ........................................ admin.pengguna.create › Admin\UserController@create
+  GET|HEAD        admin/pengguna/{pengguna} ........................................ admin.pengguna.show › Admin\UserController@show
+  PUT|PATCH       admin/pengguna/{pengguna} .................................... admin.pengguna.update › Admin\UserController@update
+  DELETE          admin/pengguna/{pengguna} .................................. admin.pengguna.destroy › Admin\UserController@destroy
+  GET|HEAD        admin/pengguna/{pengguna}/edit ................................... admin.pengguna.edit › Admin\UserController@edit
+  GET|HEAD        admin/promotion .......................................... admin.promotion.index › Admin\PromotionController@index
+  POST            admin/promotion/{rombel}/process ..................... admin.promotion.process › Admin\PromotionController@process
+  GET|HEAD        admin/promotion/{rombel}/review ........................ admin.promotion.review › Admin\PromotionController@review
+  GET|HEAD        admin/rombel ................................................ admin.rombel.index › Admin\ClassroomController@index
+  POST            admin/rombel ................................................ admin.rombel.store › Admin\ClassroomController@store
+  GET|HEAD        admin/rombel/create ....................................... admin.rombel.create › Admin\ClassroomController@create
+  GET|HEAD        admin/rombel/{rombel} ......................................... admin.rombel.show › Admin\ClassroomController@show
+  PUT|PATCH       admin/rombel/{rombel} ..................................... admin.rombel.update › Admin\ClassroomController@update
+  DELETE          admin/rombel/{rombel} ................................... admin.rombel.destroy › Admin\ClassroomController@destroy
+  POST            admin/rombel/{rombel}/assign ...................... admin.rombel.assign › Admin\ClassroomController@assignStudents
+  GET|HEAD        admin/rombel/{rombel}/edit .................................... admin.rombel.edit › Admin\ClassroomController@edit
+  POST            admin/rombel/{rombel}/remove/{siswa} ............... admin.rombel.remove › Admin\ClassroomController@removeStudent
+  GET|HEAD        admin/tahun-ajaran ................................. admin.tahun-ajaran.index › Admin\AcademicYearController@index
+  POST            admin/tahun-ajaran ................................. admin.tahun-ajaran.store › Admin\AcademicYearController@store
+  GET|HEAD        admin/tahun-ajaran/create ........................ admin.tahun-ajaran.create › Admin\AcademicYearController@create
+  GET|HEAD        admin/tahun-ajaran/{tahun_ajaran} .................... admin.tahun-ajaran.show › Admin\AcademicYearController@show
+  PUT|PATCH       admin/tahun-ajaran/{tahun_ajaran} ................ admin.tahun-ajaran.update › Admin\AcademicYearController@update
+  DELETE          admin/tahun-ajaran/{tahun_ajaran} .............. admin.tahun-ajaran.destroy › Admin\AcademicYearController@destroy
+  GET|HEAD        admin/tahun-ajaran/{tahun_ajaran}/edit ............... admin.tahun-ajaran.edit › Admin\AcademicYearController@edit
+  GET|HEAD        admin/tahun-ajaran/{tahun_ajaran}/export ......... admin.tahun-ajaran.export › Admin\AcademicYearController@export
+  POST            announcement/{announcement}/read ...................... announcement.read › Guru\AnnouncementController@markAsRead
+  GET|HEAD        dev/login/{role_id} ............................................................................ routes/web.php:56
+  POST            guru/announcement .................................... guru.announcement.store › Guru\AnnouncementController@store
+  DELETE          guru/announcement/{announcement} ................. guru.announcement.destroy › Guru\AnnouncementController@destroy
+  GET|HEAD        guru/dashboard ............................................................... guru.dashboard › routes/web.php:139
+  GET|HEAD        guru/schedule/{schedule}/assessment ............. guru.schedule.assessment.index › Guru\AssessmentController@index
+  POST            guru/schedule/{schedule}/assessment ............. guru.schedule.assessment.store › Guru\AssessmentController@store
+  GET|HEAD        guru/schedule/{schedule}/assessment/create .... guru.schedule.assessment.create › Guru\AssessmentController@create
+  GET|HEAD        guru/schedule/{schedule}/assessment/{assessment} .. guru.schedule.assessment.show › Guru\AssessmentController@show
+  PUT|PATCH       guru/schedule/{schedule}/assessment/{assessment} guru.schedule.assessment.update › Guru\AssessmentController@upda…
+  DELETE          guru/schedule/{schedule}/assessment/{assessment} guru.schedule.assessment.destroy › Guru\AssessmentController@des…
+  GET|HEAD        guru/schedule/{schedule}/assessment/{assessment}/edit guru.schedule.assessment.edit › Guru\AssessmentController@e…
+  GET|HEAD        guru/schedule/{schedule}/assessment/{assessment}/grading guru.schedule.assessment.grading.index › Guru\Assessment…
+  GET|HEAD        guru/schedule/{schedule}/assessment/{assessment}/grading/{submission} guru.schedule.assessment.grading.show › Gur…
+  POST            guru/schedule/{schedule}/assessment/{assessment}/grading/{submission} guru.schedule.assessment.grading.update › G…
+  POST            guru/schedule/{schedule}/assessment/{assessment}/questions guru.schedule.assessment.question.store › Guru\Questio…
+  DELETE          guru/schedule/{schedule}/assessment/{assessment}/questions/{question} guru.schedule.assessment.question.destroy  …
+  GET|HEAD        guru/schedule/{schedule}/assignment ............. guru.schedule.assignment.index › Guru\AssignmentController@index
+  POST            guru/schedule/{schedule}/assignment ............. guru.schedule.assignment.store › Guru\AssignmentController@store
+  GET|HEAD        guru/schedule/{schedule}/assignment/create .... guru.schedule.assignment.create › Guru\AssignmentController@create
+  GET|HEAD        guru/schedule/{schedule}/assignment/{assignment} .. guru.schedule.assignment.show › Guru\AssignmentController@show
+  PUT|PATCH       guru/schedule/{schedule}/assignment/{assignment} guru.schedule.assignment.update › Guru\AssignmentController@upda…
+  DELETE          guru/schedule/{schedule}/assignment/{assignment} guru.schedule.assignment.destroy › Guru\AssignmentController@des…
+  GET|HEAD        guru/schedule/{schedule}/assignment/{assignment}/edit guru.schedule.assignment.edit › Guru\AssignmentController@e…
+  POST            guru/schedule/{schedule}/assignment/{assignment}/grades guru.schedule.assignment.grades.update › Guru\AssignmentC…
+  GET|HEAD        guru/schedule/{schedule}/gradebook ................ guru.schedule.gradebook.index › Guru\GradebookController@index
+  GET|HEAD        guru/schedule/{schedule}/gradebook/export ....... guru.schedule.gradebook.export › Guru\GradebookController@export
+  GET|HEAD        guru/schedule/{schedule}/material ................... guru.schedule.material.index › Guru\MaterialController@index
+  POST            guru/schedule/{schedule}/material ................... guru.schedule.material.store › Guru\MaterialController@store
+  GET|HEAD        guru/schedule/{schedule}/material/create .......... guru.schedule.material.create › Guru\MaterialController@create
+  GET|HEAD        guru/schedule/{schedule}/material/{material} .......... guru.schedule.material.show › Guru\MaterialController@show
+  PUT|PATCH       guru/schedule/{schedule}/material/{material} ...... guru.schedule.material.update › Guru\MaterialController@update
+  DELETE          guru/schedule/{schedule}/material/{material} .... guru.schedule.material.destroy › Guru\MaterialController@destroy
+  GET|HEAD        guru/schedule/{schedule}/material/{material}/edit ..... guru.schedule.material.edit › Guru\MaterialController@edit
+  GET|HEAD        guru/schedule/{schedule}/meeting ...................... guru.schedule.meeting.index › Guru\MeetingController@index
+  POST            guru/schedule/{schedule}/meeting ...................... guru.schedule.meeting.store › Guru\MeetingController@store
+  GET|HEAD        guru/schedule/{schedule}/meeting/create ............. guru.schedule.meeting.create › Guru\MeetingController@create
+  GET|HEAD        guru/schedule/{schedule}/meeting/{meeting} .............. guru.schedule.meeting.show › Guru\MeetingController@show
+  PUT|PATCH       guru/schedule/{schedule}/meeting/{meeting} .......... guru.schedule.meeting.update › Guru\MeetingController@update
+  DELETE          guru/schedule/{schedule}/meeting/{meeting} ........ guru.schedule.meeting.destroy › Guru\MeetingController@destroy
+  POST            guru/schedule/{schedule}/meeting/{meeting}/attendances guru.schedule.meeting.attendances.update › Guru\MeetingCon…
+  GET|HEAD        guru/schedule/{schedule}/meeting/{meeting}/edit ......... guru.schedule.meeting.edit › Guru\MeetingController@edit
+  GET|HEAD        guru/wali-kelas ................................... guru.wali-kelas.dashboard › Guru\WaliKelasController@dashboard
+  GET|HEAD        guru/wali-kelas/jadwal .................................. guru.wali-kelas.jadwal › Guru\WaliKelasController@jadwal
+  GET|HEAD        guru/wali-kelas/kehadiran ......................... guru.wali-kelas.kehadiran › Guru\WaliKelasController@kehadiran
+  GET|HEAD        guru/wali-kelas/kehadiran/matrix ..... guru.wali-kelas.kehadiran.matrix › Guru\WaliKelasController@kehadiranMatrix
+  GET|HEAD        guru/wali-kelas/siswa ..................................... guru.wali-kelas.siswa › Guru\WaliKelasController@siswa
+  GET|HEAD        guru/wali-kelas/siswa/{siswa} ................ guru.wali-kelas.siswa.detail › Guru\WaliKelasController@siswaDetail
+  POST            logout ............................................................................... logout › routes/web.php:325
+  GET|HEAD        operator/dashboard ....................................................... operator.dashboard › routes/web.php:290
+  GET|HEAD        password ............................................................... password.index › PasswordController@index
+  PUT             password ............................................................. password.update › PasswordController@update
+  GET|HEAD        profile .................................................................. profile.index › ProfileController@index
+  PUT             profile ................................................................ profile.update › ProfileController@update
+  GET|HEAD        siswa/akademik/kehadiran ......................... siswa.akademik.kehadiran › Siswa\GradebookController@attendance
+  GET|HEAD        siswa/akademik/rapor ...................................... siswa.akademik.rapor › Siswa\GradebookController@index
+  GET|HEAD        siswa/assignment ....................................... siswa.assignment.index › Siswa\AssignmentController@index
+  GET|HEAD        siswa/assignment/{assignment} ............................ siswa.assignment.show › Siswa\AssignmentController@show
+  POST            siswa/assignment/{assignment}/submit ................. siswa.assignment.submit › Siswa\AssignmentController@submit
+  GET|HEAD        siswa/cbt ............................................................ siswa.cbt.index › Siswa\CbtController@index
+  GET|HEAD        siswa/cbt/{cbt} ........................................................ siswa.cbt.show › Siswa\CbtController@show
+  GET|HEAD        siswa/cbt/{cbt}/attempt/{attempt} ................................ siswa.cbt.attempt › Siswa\CbtController@attempt
+  POST            siswa/cbt/{cbt}/attempt/{attempt}/store ................. siswa.cbt.store_answer › Siswa\CbtController@storeAnswer
+  POST            siswa/cbt/{cbt}/attempt/{attempt}/submit ........................... siswa.cbt.submit › Siswa\CbtController@submit
+  GET|HEAD        siswa/cbt/{cbt}/exam ................................................... siswa.cbt.exam › Siswa\CbtController@exam
+  POST            siswa/cbt/{cbt}/start ................................................ siswa.cbt.start › Siswa\CbtController@start
+  GET|HEAD        siswa/course ................................................... siswa.course.index › Siswa\CourseController@index
+  GET|HEAD        siswa/course/{course} ............................................ siswa.course.show › Siswa\CourseController@show
+  GET|HEAD        siswa/dashboard ................................................ siswa.dashboard › Siswa\DashboardController@index
+  GET|HEAD        siswa/material/{material} .................................... siswa.material.show › Siswa\MaterialController@show
+
+                                                                                                                Showing [124] routes
+

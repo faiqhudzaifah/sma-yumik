@@ -19,6 +19,8 @@ use App\Http\Controllers\Guru\AssessmentGradingController;
 use App\Http\Controllers\Guru\QuestionController;
 use App\Http\Controllers\Guru\GradebookController;
 use App\Http\Controllers\Guru\MaterialController;
+use App\Http\Controllers\Guru\AnnouncementController;
+use App\Http\Controllers\Guru\WaliKelasController;
 
 // Tambahkan alias (as) untuk Controller Siswa
 use App\Http\Controllers\Siswa\CourseController as SiswaCourseController;
@@ -35,16 +37,13 @@ use App\Models\Semester;
 use App\Models\Schedule;
 use App\Models\Assessment;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/', function () {
-    return view('welcome'); // Halaman landing page / login asli nantinya
-})->name('login');
-
+// ==========================================
+// ROUTE AUTENTIKASI
+// ==========================================
+Route::middleware('guest')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'login'])->name('login.attempt');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -145,7 +144,6 @@ Route::middleware(['auth'])->group(function () {
 
             $activeSemester = Semester::where('is_active', true)->first();
 
-            // Peta Translasi Hari untuk pencocokan DB
             $hariMap = [
                 'Sunday' => 'Minggu',
                 'Monday' => 'Senin',
@@ -161,9 +159,9 @@ Route::middleware(['auth'])->group(function () {
             $courses = collect();
             $waliKelas = null;
             $actionItems = collect();
+            $mySchedules = collect();
 
             if ($activeSemester) {
-                // 1. Ambil Jadwal Hari Ini
                 $jadwalHariIni = Schedule::with(['classroom', 'subject'])
                     ->where('guru_id', $guru->id)
                     ->where('semester_id', $activeSemester->id)
@@ -171,18 +169,17 @@ Route::middleware(['auth'])->group(function () {
                     ->orderBy('jam_ke_mulai', 'asc')
                     ->get();
 
-                // 2. Ambil Semua Ruang Kelas (Courses)
                 $courses = Schedule::with(['classroom', 'subject'])
                     ->where('guru_id', $guru->id)
                     ->where('semester_id', $activeSemester->id)
                     ->get();
 
-                // 3. Cek Status Wali Kelas
+                $mySchedules = $courses;
+
                 $waliKelas = Classroom::where('wali_kelas_id', $guru->id)
                     ->where('semester_id', $activeSemester->id)
                     ->first();
 
-                // 4. Ambil Tugas/Kuis yang butuh aksi (Published/Closed)
                 $actionItems = Assessment::with('schedule.classroom')
                     ->whereHas('schedule', function ($q) use ($guru) {
                         $q->where('guru_id', $guru->id);
@@ -200,7 +197,8 @@ Route::middleware(['auth'])->group(function () {
                 'jadwalHariIni',
                 'courses',
                 'waliKelas',
-                'actionItems'
+                'actionItems',
+                'mySchedules'
             ));
         })->name('dashboard');
 
@@ -232,6 +230,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('gradebook', [GradebookController::class, 'index'])->name('gradebook.index');
             Route::get('gradebook/export', [GradebookController::class, 'export'])->name('gradebook.export');
         });
+
+        // ==========================================
+        // PANEL WALI KELAS (SEJAJAR DENGAN SCHEDULE)
+        // ==========================================
+        Route::prefix('wali-kelas')->name('wali-kelas.')->group(function () {
+            Route::get('/', [WaliKelasController::class, 'dashboard'])->name('dashboard');
+            Route::get('/jadwal', [WaliKelasController::class, 'jadwal'])->name('jadwal');
+            Route::get('/siswa', [WaliKelasController::class, 'siswa'])->name('siswa');
+            Route::get('/siswa/{siswa}', [WaliKelasController::class, 'siswaDetail'])->name('siswa.detail');
+            Route::get('/kehadiran', [WaliKelasController::class, 'kehadiran'])->name('kehadiran');
+            Route::get('/kehadiran/matrix', [WaliKelasController::class, 'kehadiranMatrix'])->name('kehadiran.matrix');
+        });
     });
 
     // ==========================================
@@ -239,26 +249,21 @@ Route::middleware(['auth'])->group(function () {
     // ==========================================
     Route::prefix('siswa')->name('siswa.')->group(function () {
 
-        // Dashboard Siswa
         Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
 
-        // Mata Pelajaran (Course) & Pertemuan
         Route::prefix('course')->name('course.')->group(function () {
             Route::get('/', [SiswaCourseController::class, 'index'])->name('index');
             Route::get('/{course}', [SiswaCourseController::class, 'show'])->name('show');
         });
 
-        // Akses Materi Pembelajaran
         Route::get('/material/{material}', [SiswaMaterialController::class, 'show'])->name('material.show');
 
-        // Tugas & Submission
         Route::prefix('assignment')->name('assignment.')->group(function () {
             Route::get('/', [SiswaAssignmentController::class, 'index'])->name('index');
             Route::get('/{assignment}', [SiswaAssignmentController::class, 'show'])->name('show');
             Route::post('/{assignment}/submit', [SiswaAssignmentController::class, 'submit'])->name('submit');
         });
 
-        // CBT Engine (Kuis & Ujian)
         Route::prefix('cbt')->name('cbt.')->group(function () {
             Route::get('/', [SiswaCbtController::class, 'index'])->name('index');
             Route::get('/{cbt}', [SiswaCbtController::class, 'show'])->name('show');
@@ -269,17 +274,10 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{cbt}/attempt/{attempt}/submit', [SiswaCbtController::class, 'submit'])->name('submit');
         });
 
-        // Rapor dan Kehadiran
         Route::prefix('akademik')->name('akademik.')->group(function () {
             Route::get('/rapor', [SiswaGradebookController::class, 'index'])->name('rapor');
             Route::get('/kehadiran', [SiswaGradebookController::class, 'attendance'])->name('kehadiran');
         });
-
-        // Route::get('/gradebook', [\App\Http\Controllers\Siswa\GradebookController::class, 'index'])
-        //     ->name('gradebook.index');
-
-        // Route::get('/gradebook/attendance', [\App\Http\Controllers\Siswa\GradebookController::class, 'attendance'])
-        //     ->name('gradebook.attendance');
     });
 
     // ==========================================
@@ -292,12 +290,34 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ==========================================
-    // ROUTE GLOBAL
+    // 5. ROUTE PENGUMUMAN (GURU & SISWA)
     // ==========================================
-    Route::post('/logout', function () {
-        Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-        return redirect('/');
-    })->name('logout');
+    Route::post('/guru/announcement', [AnnouncementController::class, 'store'])
+        ->name('guru.announcement.store');
+
+    Route::delete('/guru/announcement/{announcement}', [AnnouncementController::class, 'destroy'])
+        ->name('guru.announcement.destroy');
+
+    Route::post('/announcement/{announcement}/read', [AnnouncementController::class, 'markAsRead'])
+        ->name('announcement.read');
+
+    // ==========================================
+    // 6. ROUTE PROFIL & PASSWORD (SEMUA ROLE)
+    // ==========================================
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])
+        ->name('profile.index');
+
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::get('/password', [\App\Http\Controllers\PasswordController::class, 'index'])
+        ->name('password.index');
+
+    Route::put('/password', [\App\Http\Controllers\PasswordController::class, 'update'])
+        ->name('password.update');
+
+    // ==========================================
+    // 7. ROUTE GLOBAL
+    // ==========================================
+    Route::post('/logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 });
